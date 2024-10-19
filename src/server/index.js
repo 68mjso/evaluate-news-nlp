@@ -1,31 +1,68 @@
 var path = require("path");
 const express = require("express");
-const mockAPIResponse = require("./mockAPI.js");
+const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
+const axios = require("axios");
+const FormData = require("form-data");
 dotenv.config();
-
-console.log(`Your API key is ${process.env.API_KEY}`);
 
 const app = express();
 
-app.use(express.static("dist"));
+const cors = require("cors");
+
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 console.log(__dirname);
 
-var textapi = {
-  api: process.env.API_KEY,
-};
+// Variables for url and api key
+
+const apiKey = process.env.API_KEY;
+const endPoint = "https://api.meaningcloud.com/sentiment-2.1";
 
 app.get("/", function (req, res) {
-  // res.sendFile('dist/index.html')
-  res.sendFile(path.resolve("src/client/views/index.html"));
+  res.send(
+    "This is the server API page, you may access its services via the client app."
+  );
 });
 
-// designates what port the app will listen to for incoming requests
-app.listen(8080, function () {
-  console.log("Example app listening on port 8080!");
+// POST Route
+app.post("/submit", async function (req, res, next) {
+  const input = req?.body?.input ?? "";
+  console.log(input);
+  if (input.trim() === "") {
+    var e = new Error("Missing input");
+    e.status = 400;
+    next(e);
+    return;
+  }
+  const meaningData = await getMeaningData(input);
+  const { data } = meaningData;
+  const resResult = {
+    polarity: data.agreement,
+    subjectivity: data.subjectivity,
+    text: input,
+    confidence: data.confidence,
+    irony: data.irony,
+    model: data.model,
+    score_tag: data.score_tag,
+  };
+  res.status(200).send({ message: JSON.stringify(resResult) });
 });
 
-app.get("/test", function (req, res) {
-  res.send(mockAPIResponse);
+// Designates what port the app will listen to for incoming requests
+app.listen(8000, function () {
+  console.log("Example app listening on port 8000!");
 });
+
+function getMeaningData(input) {
+  const form = new FormData();
+  form.append("key", apiKey);
+  form.append("txt", input);
+  const response = axios
+    .post(endPoint, form, { ...form.getHeaders() })
+    .then((res) => res)
+    .catch((err) => err);
+  return response;
+}
