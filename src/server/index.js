@@ -66,3 +66,5 @@ function getMeaningData(input) {
     .catch((err) => err);
   return response;
 }
+
+export { app };
