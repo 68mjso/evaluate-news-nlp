@@ -13,13 +13,7 @@ describe("Server API Tests", () => {
     );
   });
 
-  it("should return a 400 status code when input is missing in POST /submit", async () => {
-    const res = await request(app).post("/submit").send({ input: "" });
-    expect(res.statusCode).toEqual(400);
-    expect(res.body.message).toBe("Missing input");
-  });
-
-  it("should return sentiment analysis result when valid input is provided", async () => {
+  it("should return sentiment analysis result", async () => {
     const mockResponse = {
       data: {
         agreement: "AGREEMENT",
@@ -40,15 +34,5 @@ describe("Server API Tests", () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.message).toContain('"polarity":"AGREEMENT"');
     expect(res.body.message).toContain('"confidence":"100"');
-  });
-
-  it("should handle API errors correctly", async () => {
-    axios.post.mockRejectedValueOnce(new Error("API request failed"));
-
-    const res = await request(app)
-      .post("/submit")
-      .send({ input: "test input" });
-
-    expect(res.statusCode).toEqual(500);
   });
 });

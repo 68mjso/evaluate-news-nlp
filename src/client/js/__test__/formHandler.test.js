@@ -10,10 +10,10 @@ global.fetch = jest.fn(() =>
 
 const { handleSubmit } = require("../formHandler");
 
-describe("handleSubmit", () => {
-  let form;
-  let input;
-  let results;
+describe("Form Handler", () => {
+  var form;
+  var input;
+  var results;
 
   beforeEach(() => {
     // Mocking DOM elements
@@ -38,7 +38,6 @@ describe("handleSubmit", () => {
 
   it("Should call alert if input is empty", () => {
     input.value = "";
-    console.log(form);
     const event = new Event("submit");
     form.addEventListener("submit", handleSubmit);
 
